@@ -2,5 +2,19 @@
     "name": "Manual Sitemapping Tools",
     "version": "0.0.0",
     "manifest_version": 3,
-    "description": "Tooling to help map out a website manually."
+    "description": "Tooling to help map out a website manually.",
+    "premissions": [
+        "activeTab",
+        "scripting"
+    ],
+    "content_scripts": [
+    {
+        "matches": [
+            "<all_urls>"
+        ],
+        "js": [
+            "js/content.js"
+        ],
+        "run_at": "document_end"
+    }]
 }
