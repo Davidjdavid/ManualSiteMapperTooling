@@ -1,8 +1,19 @@
+// js/content.js
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.command === "executeAction") {
+    console.log('Action triggered by sidebar');
+    // ... do something on the page ...
+  }
+});
+
+
 // Variable to store all of the links we grab.
 let capturedLinks = [];
 // Fixed typo: currnetColumn -> currentColumn
 let currentColumn = "1";
 let sitemappingModeToggle = false;
+
+let columnSelect = document.getElementById("toggleCheckbox");
 
 document.addEventListener("click", logKey);
 
@@ -21,6 +32,8 @@ document.addEventListener("keydown", (event) => {
         case "5":
             return currentColumn = "5";
     }
+            console.log(columnSelect);
+
 });
 
 //Changes the current column we are adding pages to whatever depth the user clicks on their keyboard
@@ -28,6 +41,7 @@ document.addEventListener("keydown", (event) => {
     if (event.key === "Alt") {
         sitemappingModeToggle = !sitemappingModeToggle;
         console.log("Sitemapping Mode:", sitemappingModeToggle);
+        console.log(columnSelect);
     }
 });
 

@@ -1,20 +1,31 @@
 {
     "name": "Manual Sitemapping Tools",
-    "version": "0.0.1",
-    "manifest_version": 3,
-    "description": "Tooling to help map out a website manually.",
-    "premissions": [
-        "activeTab",
-        "scripting"
-    ],
-    "content_scripts": [
-    {
-        "matches": [
-            "<all_urls>"
+        "version": "0.0.1",
+        "manifest_version": 3,
+        "description": "Tooling to help map out a website manually.",
+
+        "background": {
+            "service_worker": "js/background.js"
+        },
+        "action": {
+            "default_title": "Click to open panel"
+        },
+        
+        "side_panel": {
+            "default_path": "html/sidepanel.html"
+        },
+        
+        "permissions": [
+            "sidePanel",
+            "scripting",
+            "activeTab"
         ],
-        "js": [
-            "js/content.js"
-        ],
-        "run_at": "document_end"
-    }]
-}
+        
+        "content_scripts": [
+        {
+            "matches": [ "<all_urls>" ],
+            "js": [ "js/content.js" ],
+            "run_at": "document_end"
+        }
+        ]
+    }
