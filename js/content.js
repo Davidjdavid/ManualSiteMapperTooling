@@ -1,61 +1,35 @@
+document.addEventListener('click', logKey);
+let capturedLinks = []
+let toolingActive = false; // Start the tool off by default
+
 // js/content.js
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.command === "executeAction") {
-    console.log('Action triggered by sidebar');
-    // ... do something on the page ...
-  }
-});
-
-
-// Variable to store all of the links we grab.
-let capturedLinks = [];
-// Fixed typo: currnetColumn -> currentColumn
-let currentColumn = "1";
-let sitemappingModeToggle = false;
-
-let columnSelect = document.getElementById("toggleCheckbox");
-
-document.addEventListener("click", logKey);
-
-//Changes the current column we are adding pages to whatever depth the user clicks on their keyboard
-document.addEventListener("keydown", (event) => {
-    switch (event.key) {
-        case "1":
-            // Fixed typo: currnetColumn -> currentColumn
-            return currentColumn = "1";
-        case "2":
-            return currentColumn = "2";
-        case "3":
-            return currentColumn = "3";
-        case "4":
-            return currentColumn = "4";
-        case "5":
-            return currentColumn = "5";
-    }
-            console.log(columnSelect);
-
-});
-
-//Changes the current column we are adding pages to whatever depth the user clicks on their keyboard
-document.addEventListener("keydown", (event) => {
-    if (event.key === "Alt") {
-        sitemappingModeToggle = !sitemappingModeToggle;
-        console.log("Sitemapping Mode:", sitemappingModeToggle);
-        console.log(columnSelect);
-    }
-});
-
-// Downloads the JSON as an Excel file
-document.addEventListener("keydown", (event) => {
-    if (event.key === "Tab") {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => { 
+    //Change all of this if else stuff into a switch statement
+    if (message.command === "executeAction") {
+        console.log('Action triggered by sidebar');
         downloadJSONAsCSV(capturedLinks);
-    }
-});
 
-document.addEventListener("keydown", (event) => {
-    if (event.key === "Shift") {
-        capturedLinks = [];
+    } 
+
+    if (message.command === "setColumn") {
+        currentColumn = message.column;
+        console.log("Column set to:", currentColumn);
     }
+
+
+    if (message.command === "toggleActive") {
+        toggleStatus = message.toggle;
+        console.log("checkbox toggled at:", toggleStatus);
+        if(toggleStatus) {
+            console.log("Its on")
+            toolingActive = true;
+        }
+        if(!toggleStatus) {
+            console.log("Its off")
+            toolingActive = false;
+        }
+    }
+
 });
 
 // Class that is used to call on when a new Excel row is used
@@ -75,13 +49,14 @@ class ExcelRow {
     }
 }
 
-
 function logKey(e) { // Fixed: Use 'e' instead of 'event'
     const linkElement = e.target.closest('a');
+    console.log("Tool is on and working");
 
-    // **THE FIX FOR BLOB URLS IS HERE**
     // Check if a link was clicked, if the tool is on, AND if the link is NOT a blob URL
-    if (linkElement && sitemappingModeToggle === false && !linkElement.href.startsWith('blob:')) {
+    if (toolingActive && !linkElement.href.startsWith('blob:')) {
+        console.log("Tool is on and working part 2");
+
         let testRow = new ExcelRow({})
         e.preventDefault(); // Fixed: Use 'e'
 
@@ -103,8 +78,6 @@ function logKey(e) { // Fixed: Use 'e' instead of 'event'
                 testRow._col5 = linkElement.text;
                 break;
         }
-        
-        // **THE FIX FOR TWO URL COLUMNS IS HERE**
         // Property now matches the class constructor (_colURLs)
         testRow._colURLs = linkElement.href 
         
@@ -115,7 +88,10 @@ function logKey(e) { // Fixed: Use 'e' instead of 'event'
     }
 }
 
+// TO DO!!
+// Need to link to this up to the executeAction function so when the export button is clicked it exports the JSON using this function
 
+// Exports the JSON as a CSV file named "data.csv"
 function downloadJSONAsCSV(jsonData, filename = 'data.csv') {
     // 1. Check if jsonData is valid
     if (!jsonData || !jsonData.length) {
