@@ -1,6 +1,6 @@
 {
     "name": "Manual Sitemapping Tools",
-    "version": "0.0.2",
+    "version": "0.0.5",
     "manifest_version": 3,
     "description": "Tooling to help map out a website manually.",
 
@@ -17,7 +17,6 @@
     
     "permissions": [
         "sidePanel",
-        "scripting",
         "activeTab"
     ],
     

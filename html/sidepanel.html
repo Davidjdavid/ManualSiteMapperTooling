@@ -6,26 +6,24 @@
     <title>Document</title>
 </head>
 <body>
-    Text
-    <div class="toggle">
-        <input type="checkbox" id="toggleCheckbox">
-    </div>
-    <div class="rowCursor">
-        <input type="number" id="rowNumber">
+    <div id="toggle">
+        <label for="toggleCheckbox">Toggle on or off: </label>
+        <input type="checkbox" id="toggleCheckbox" name="toggleCheckbox">
     </div>
     <div class="columnSelect">
-        <input type="radio" name="column" value="1" id="col1"><lablel for col1>Depth 1</lablel>
+        <input type="radio" name="column" value="1" id="col1" checked="checked"><lablel for col1>Depth 1</lablel>
         <input type="radio" name="column" value="2" id="col2"><lablel for col1>Depth 2</lablel>
         <input type="radio" name="column" value="3" id="col3"><lablel for col1>Depth 3</lablel>
         <input type="radio" name="column" value="4" id="col4"><lablel for col1>Depth 4</lablel>
         <input type="radio" name="column" value="5" id="col5"><lablel for col1>Depth 5</lablel>
-        <input type="radio" name="column" value="3" id="col3"><lablel for col1>Depth 6</lablel>
-        <input type="radio" name="column" value="4" id="col4"><lablel for col1>Depth 7</lablel>
-        <input type="radio" name="column" value="5" id="col5"><lablel for col1>Depth 8</lablel>
     </div>
-    <div class="setting">
+    <div class="settings">
         <button id="exportBtn">Export</button>
+        <button id="resetBtn">Reset</button>
+        <button id="undoBtn">Undo</button>
+
     </div>
+    <div id="sitemapPreview">No sitemap yet</div>
     <script src="/js/sidepanel.js"></script>
 </body>
 </html>

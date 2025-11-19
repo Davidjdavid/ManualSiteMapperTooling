@@ -1,18 +1,27 @@
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
-});
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
+    .catch((error) => console.error(error));
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // Check for the active tab
+  if (message.action === "updateSitemapPreviewAction") {
+      console.log("Sitemap updated:", message.sitemap);
+  }
+
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (!tabs[0] || !tabs[0].id) return;
     const tabId = tabs[0].id;
 
     if (message.action === "exportButton") {
       chrome.tabs.sendMessage(tabId, { command: "executeAction" });
-    
     } 
     
+    if (message.action === "resetAction") {
+      chrome.tabs.sendMessage(tabId, { command: "resetAction" });
+    } 
+
+    if (message.action === "undoAction") {
+      chrome.tabs.sendMessage(tabId, { command: "undoAction" });
+    } 
+
     if (message.action === "updateColumn") {
       chrome.tabs.sendMessage(tabId, { 
           command: "setColumn", 
@@ -27,8 +36,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
     }
   });
-  
-  // Return true if you might send a response asynchronously
-  // (Not strictly needed here, but good practice)
-  return true; 
 });
