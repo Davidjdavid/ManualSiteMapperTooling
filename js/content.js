@@ -1,6 +1,13 @@
-let capturedLinks = []
+let capturedLinks = [];
 let toolingActive = false; // Start the tool off by default
 let currentColumn = "1";
+let box = null;
+
+document.addEventListener("mousedown", mouseDown);
+document.addEventListener('click', logKey);
+
+
+
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => { 
     //Change all of this if else stuff into a switch statement
@@ -44,7 +51,6 @@ class ExcelRow {
 
 }
 
-document.addEventListener('click', logKey);
 function logKey(e) { // Fixed: Use 'e' instead of 'event'
     const linkElement = e.target.closest('a');
 
@@ -125,3 +131,118 @@ function downloadJSONAsCSV(jsonData, filename = 'data.csv') {
         URL.revokeObjectURL(url); // Clean up
     }
 }
+
+let startX, startY;
+
+function mouseDown(e) {
+    startX = e.pageX;
+    startY = e.pageY;
+
+    box = document.createElement("span");
+    box.style.position = "absolute";
+    box.style.border = "2px dotted";
+    box.style.left = startX + "px";
+    box.style.top = startY + "px";
+    box.style.visibility = "visible";
+
+    document.body.appendChild(box);
+
+    document.addEventListener("mousemove", mouseMove);
+    document.addEventListener("mouseup", mouseUp);
+}
+
+function mouseMove(e) {
+    if (!box) return; // If the box returns false then stop the function here
+
+    const width = e.pageX - startX;
+    const height = e.pageY - startY;
+
+    box.style.left = Math.min(e.pageX, startX) + "px";
+    box.style.top = Math.min(e.pageY, startY) + "px";
+    box.style.width = Math.abs(width) + "px";
+    box.style.height = Math.abs(height) + "px";
+}
+
+function mouseUp(e) {
+    document.removeEventListener("mousemove", mouseMove);
+    document.removeEventListener("mouseup", mouseUp);
+
+    // get the actual <a> elements inside the selection box
+    const selectedLinks = findUrlsInsideBox(box);
+
+    if (selectedLinks && selectedLinks.length > 0) {
+        selectedLinks.forEach(linkEl => {
+            // skip blob: urls, same logic as your click handler
+            if (!linkEl.href || linkEl.href.startsWith('blob:')) return;
+
+            const newRow = new ExcelRow({}); // start empty
+
+            // fill the correct column based on currentColumn
+            switch (currentColumn) {
+                case "1":
+                    newRow._col1 = linkEl.text || linkEl.textContent || linkEl.innerText || "";
+                    break;
+                case "2":
+                    newRow._col2 = linkEl.text || linkEl.textContent || linkEl.innerText || "";
+                    break;
+                case "3":
+                    newRow._col3 = linkEl.text || linkEl.textContent || linkEl.innerText || "";
+                    break;
+                case "4":
+                    newRow._col4 = linkEl.text || linkEl.textContent || linkEl.innerText || "";
+                    break;
+                case "5":
+                    newRow._col5 = linkEl.text || linkEl.textContent || linkEl.innerText || "";
+                    break;
+                default:
+                    newRow._col1 = linkEl.text || linkEl.textContent || linkEl.innerText || "";
+            }
+
+            newRow._colURLs = linkEl.href;
+
+            // optional: avoid exact duplicates (same URL + same column text)
+            const isDuplicate = capturedLinks.some(r => r._colURLs === newRow._colURLs && r._col1 === newRow._col1 && r._col2 === newRow._col2 && r._col3 === newRow._col3 && r._col4 === newRow._col4 && r._col5 === newRow._col5);
+            if (!isDuplicate) {
+                capturedLinks.push(newRow);
+            }
+        });
+
+        // send one update with the whole updated array (same as your click flow)
+        chrome.runtime.sendMessage({
+            action: "updateSitemapPreviewAction",
+            sitemap: capturedLinks
+        });
+    }
+
+    console.log("URLs inside selection:", selectedLinks.map(l => l.href));
+
+    // remove and cleanup
+    box.remove();
+    box = null;
+}
+
+
+
+function findUrlsInsideBox(box) {
+    const boxRect = box.getBoundingClientRect();
+    const links = document.querySelectorAll("a[href]");
+    const found = [];
+
+    links.forEach(link => {
+        const rect = link.getBoundingClientRect();
+
+        const overlap =
+            rect.left < boxRect.right &&
+            rect.right > boxRect.left &&
+            rect.top < boxRect.bottom &&
+            rect.bottom > boxRect.top;
+
+        if (overlap) {
+            // push the element itself so caller can read href and text
+            found.push(link);
+        }
+    });
+
+    return found;
+}
+
